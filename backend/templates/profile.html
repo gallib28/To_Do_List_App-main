@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Profile</title>
+    <link rel="stylesheet" href="../frontend/static_css/style.css">
 </head>
 <body>
-    <div class="profile-container">
-        <h2>Profile Details</h2>
-        <form action="/update_profile" method="post">
-            <input type="text" name="username" placeholder="Update your username" required>
-            <input type="password" name="password" placeholder="New password">
+    <div class="container">
+        <h2>Profile</h2>
+        <form id="profile-form">
+            <input type="text" id="username" placeholder="Update Username" required>
+            <input type="password" id="password" placeholder="New Password">
             <button type="submit">Update Profile</button>
         </form>
         <div id="task-analysis">
@@ -19,8 +19,8 @@
             <p>Completed Tasks: <span id="completed-tasks"></span></p>
             <p>Tasks In Progress: <span id="in-progress-tasks"></span></p>
         </div>
-        <a href="/user_tasks">Back to Tasks</a>
+        <a href="user_tasks.html">Back to Tasks</a>
     </div>
-    <script src="/static/js/profile.js"></script>
+    <script src="../frontend/javascript/profile.js"></script>
 </body>
 </html>
