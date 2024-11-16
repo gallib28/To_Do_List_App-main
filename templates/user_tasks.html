@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Tasks</title>
-    <link rel="stylesheet" href="../frontend/static_css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <h2>My Tasks</h2>
         <ul id="tasks-list"></ul>
-        <a href="profile.html">Go to Profile</a>
+        <a href="{{ url_for('profile') }}">Go to Profile</a>
     </div>
-    <script src="../frontend/javascript/main.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

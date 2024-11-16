@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="../frontend/static_css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
@@ -14,13 +14,8 @@
             <input type="password" id="password" placeholder="New Password">
             <button type="submit">Update Profile</button>
         </form>
-        <div id="task-analysis">
-            <h3>Task Analysis</h3>
-            <p>Completed Tasks: <span id="completed-tasks"></span></p>
-            <p>Tasks In Progress: <span id="in-progress-tasks"></span></p>
-        </div>
-        <a href="user_tasks.html">Back to Tasks</a>
+        <a href="{{ url_for('user_tasks') }}">Back to Tasks</a>
     </div>
-    <script src="../frontend/javascript/profile.js"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 </body>
 </html>
