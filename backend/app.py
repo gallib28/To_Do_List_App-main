@@ -13,6 +13,13 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # החלף במפתח סודי משלך
 
+
+
+@app.route('/')
+def home():
+    return redirect(url_for('login'))
+
+
 # דף התחברות
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -20,19 +27,16 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # בדיקת התחברות
         if db_functions.authenticate_user(username, password):
             user = db_functions.get_user_by_username(username)
             session['user_id'] = user['user_id']
             session['username'] = username
             session['is_admin'] = user['is_admin']
             
-            # אם המשתמש הוא מנהל
             if user['is_admin']:
                 return redirect(url_for('admin_dashboard'))
             return redirect(url_for('profile'))
         
-        # אם ההתחברות נכשלה
         return render_template('login.html', message='Invalid username or password')
     return render_template('login.html')
 
