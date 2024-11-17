@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import db_functions
 
 
+
 app = Flask(
     __name__,
     template_folder='../templates',  # מיקום תיקיית התבניות
@@ -97,6 +98,7 @@ def admin_dashboard():
 
 # פונקציה להוספת משימה חדשה
 @app.route('/add_task', methods=['POST'])
+@app.route('/add_task', methods=['POST'])
 def add_task():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -105,9 +107,15 @@ def add_task():
     task_description = request.form.get('task_description')
     task_due_date = request.form.get('task_due_date')
     task_priority = request.form.get('task_priority')
+
+    # יצירת המשימה בבסיס הנתונים
+    db_functions.create_task(task_name, task_description, task_due_date, "todo", "to-do", session['user_id'], None, task_priority)
     
-    db_functions.add_task(session['user_id'], task_name, task_description, task_due_date, task_priority)
-    flash('Task added successfully!', 'success')
+    # הצעת תתי-משימות
+    subtasks = db_functions.get_subtasks(task_name, task_description)
+    if subtasks:
+        flash(f"Suggested subtasks: {', '.join(subtasks)}", 'info')
+
     return redirect(url_for('user_tasks'))
 
 # פונקציה למחיקת משימה
