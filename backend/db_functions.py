@@ -13,38 +13,37 @@ load_dotenv()
 
 
 # הגדרת מפתח API
-openai.api_key = os.getenv("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")
+openai.api_key = os.getenv("OPENAI_ADMIN_API_KEY")
 def get_subtasks(task_name, task_description):
-    prompt = prompt = f"""
+    prompt = f"""
+    You must not give a response with more than 100 tokens.
+
     You are given a primary task called '{task_name}'. The task description is as follows:
     "{task_description}"
 
-    Please break it down into several smaller, manageable sub-tasks that, when completed, will collectively achieve the main objective. Follow these steps:
-
-    1. **Analyze the main task:** Understand the overall goal and desired outcome of the task based on the given description.
-    2. **Divide into sub-tasks:** Decompose the main task '{task_name}' into a series of clear and specific sub-tasks, each addressing a part of the problem or a specific step towards the solution.
-    3. **Logical order:** Arrange the sub-tasks in a logical sequence to ensure a structured and efficient process.
-    4. **Provide execution guidelines:** For each sub-task, include clear instructions or actions required to complete it.
-
-    Use the following structure:
-    - Sub-task 1: [Sub-task name]
-      - Objective: [Objective of the sub-task]
-      - Instructions: [Step-by-step actions for the sub-task]
-
-    Continue this process until the entire main task is fully decomposed.
+    Please break it down into several smaller, manageable sub-tasks.
+    Keep it in this format:
+    1.
+    2.
+    3.
+    4.
+    5.
     """
+
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": "Your prompt here"}]
+        # שימוש בפונקציה הנכונה לפי הגרסה החדשה
+        response = openai.completions.create(
+            model="gpt-3.5-turbo-instruct",
+            prompt=prompt,
+            max_tokens=100,
+            temperature=0.7
         )
-        # הפקת רשימת תתי-משימות מהתגובה
-        subtasks = response['choices'][0]['message']['content']
-        return subtasks.split("\n")
+        # גישה לטקסט של התשובה ישירות
+        text_output = response.choices[0].text.strip()
+        return text_output.split("\n")
     except Exception as e:
         print(f"Error in API request: {e}")
-        return []
-
+        return None
 
 
 # CONVERTING THE DATA 
