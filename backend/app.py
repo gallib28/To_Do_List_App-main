@@ -7,7 +7,7 @@
 # 4. saving dependencies ``` pip freeze > requirements.txt ```
 # 5. runnin g the file is ``` python app_back_front.py ``` 
 # if we want to take dependencies from other project : ``` pip install -r requirements.txt ``` 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import db_functions
 
 app = Flask(
@@ -30,7 +30,6 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # בדיקת שם משתמש וסיסמה במסד הנתונים
         if db_functions.login_user(username, password):
             user_id = db_functions.get_user_id_by_username(username)
             session['user_id'] = user_id
@@ -40,24 +39,7 @@ def login():
             return redirect(url_for('profile'))
         
         flash('Invalid username or password', 'danger')
-        return render_template('login.html')
-    
     return render_template('login.html')
-
-# דף הרשמה
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        # יצירת משתמש חדש
-        if db_functions.create_user(username, password):
-            flash('Account created successfully. Please log in.', 'success')
-            return redirect(url_for('login'))
-        
-        flash('User already exists. Please choose a different username.', 'warning')
-    return render_template('register.html')
 
 # דף פרופיל
 @app.route('/profile')
@@ -82,31 +64,19 @@ def user_tasks():
 def add_task():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
-    task_name = request.form.get('task_name')
-    task_description = request.form.get('task_description')
-    task_due_date = request.form.get('task_due_date')
-    task_priority = request.form.get('task_priority')
+
+    data = request.json
+    task_name = data.get('task_name')
+    task_description = data.get('task_description')
+    task_due_date = data.get('task_due_date')
+    task_priority = data.get('task_priority')
 
     # יצירת המשימה בבסיס הנתונים
     db_functions.create_task(task_name, task_description, task_due_date, "todo", "to-do", session['user_id'], None, task_priority)
 
     # הצעת תתי-משימות
     subtasks = db_functions.get_subtasks(task_name, task_description)
-    if subtasks:
-        flash(f"Suggested subtasks: {', '.join(subtasks)}", 'info')
-
-    return redirect(url_for('user_tasks'))
-
-# פונקציה למחיקת משימה
-@app.route('/delete_task/<int:task_id>')
-def delete_task(task_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    db_functions.delete_task(task_id)
-    flash('Task deleted successfully!', 'info')
-    return redirect(url_for('user_tasks'))
+    return jsonify({"success": True, "suggestions": subtasks})
 
 # יציאה מהמערכת
 @app.route('/logout')

@@ -9,6 +9,13 @@
 <body>
     <div class="container">
         <h2>My Tasks</h2>
+        <form id="add-task-form">
+            <input type="text" id="task_name" placeholder="Task Name" required>
+            <input type="text" id="task_description" placeholder="Task Description" required>
+            <input type="date" id="task_due_date" required>
+            <input type="text" id="task_priority" placeholder="Task Priority">
+            <button type="submit">Add Task</button>
+        </form>
         <ul id="tasks-list"></ul>
         <a href="{{ url_for('profile') }}">Go to Profile</a>
     </div>
