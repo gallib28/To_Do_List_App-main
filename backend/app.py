@@ -10,8 +10,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import db_functions
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+
+app = Flask(
+    __name__,
+    template_folder='../templates',  # מיקום תיקיית התבניות
+    static_folder='../static'       # מיקום תיקיית הקבצים הסטטיים
+)
+
 
 # דף הבית – מפנה לדף ההתחברות
 @app.route('/')
