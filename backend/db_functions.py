@@ -2,14 +2,17 @@ import mysql.connector
 import bcrypt
 from dotenv import load_dotenv
 import os
-import openai
+from openai import OpenAI
+
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 
 # הגדרת מפתח API
-openai.api_key = os.getenv("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")
+OpenAI = OpenAI() 
+OpenAI.api_key = os.getenv("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")
 def get_subtasks(task_name, task_description):
     prompt = prompt = f"""
     You are given a primary task called '{task_name}'. The task description is as follows:
@@ -30,7 +33,7 @@ def get_subtasks(task_name, task_description):
     Continue this process until the entire main task is fully decomposed.
     """
     try:
-        response = openai.ChatCompletion.create(
+        response = OpenAI.ChatCompletion.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": "Your prompt here"}]
         )
