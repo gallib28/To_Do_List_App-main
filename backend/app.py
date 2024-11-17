@@ -10,14 +10,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import db_functions
 
-
-
 app = Flask(
     __name__,
     template_folder='../templates',  # מיקום תיקיית התבניות
     static_folder='../static'       # מיקום תיקיית הקבצים הסטטיים
 )
 
+app.secret_key = 'your_secret_key_here'
 
 # דף הבית – מפנה לדף ההתחברות
 @app.route('/')
@@ -30,23 +29,16 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         # בדיקת שם משתמש וסיסמה במסד הנתונים
-        if db_functions.authenticate_user(username, password):
-            user = db_functions.get_user_by_username(username)
-            session['user_id'] = user['user_id']
+        if db_functions.login_user(username, password):
+            user_id = db_functions.get_user_id_by_username(username)
+            session['user_id'] = user_id
             session['username'] = username
-            session['is_admin'] = user['is_admin']
-            
-            # אם המשתמש הוא מנהל
-            if user['is_admin']:
-                flash('Welcome, Admin!', 'success')
-                return redirect(url_for('admin_dashboard'))
-            
+
             flash(f'Welcome, {username}!', 'success')
             return redirect(url_for('profile'))
         
-        # במקרה של התחברות לא מוצלחת
         flash('Invalid username or password', 'danger')
         return render_template('login.html')
     
@@ -58,7 +50,7 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         # יצירת משתמש חדש
         if db_functions.create_user(username, password):
             flash('Account created successfully. Please log in.', 'success')
@@ -73,9 +65,8 @@ def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    user = db_functions.get_user_by_id(session['user_id'])
-    tasks_analysis = db_functions.get_task_analysis(session['user_id'])
-    return render_template('profile.html', user=user, analysis=tasks_analysis)
+    tasks = db_functions.get_user_tasks(session['user_id'])
+    return render_template('profile.html', tasks=tasks)
 
 # דף המשימות של המשתמש
 @app.route('/user_tasks')
@@ -83,21 +74,10 @@ def user_tasks():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    tasks = db_functions.get_tasks_by_user(session['user_id'])
+    tasks = db_functions.get_user_tasks(session['user_id'])
     return render_template('user_tasks.html', tasks=tasks)
 
-# דף המנהל
-@app.route('/admin_dashboard')
-def admin_dashboard():
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('login'))
-    
-    tasks = db_functions.get_all_tasks()
-    users = db_functions.get_all_users()
-    return render_template('admin_dashboard.html', tasks=tasks, users=users)
-
 # פונקציה להוספת משימה חדשה
-@app.route('/add_task', methods=['POST'])
 @app.route('/add_task', methods=['POST'])
 def add_task():
     if 'user_id' not in session:
@@ -110,7 +90,7 @@ def add_task():
 
     # יצירת המשימה בבסיס הנתונים
     db_functions.create_task(task_name, task_description, task_due_date, "todo", "to-do", session['user_id'], None, task_priority)
-    
+
     # הצעת תתי-משימות
     subtasks = db_functions.get_subtasks(task_name, task_description)
     if subtasks:
@@ -127,19 +107,6 @@ def delete_task(task_id):
     db_functions.delete_task(task_id)
     flash('Task deleted successfully!', 'info')
     return redirect(url_for('user_tasks'))
-
-# פונקציה לעדכון פרטי המשתמש
-@app.route('/update_profile', methods=['POST'])
-def update_profile():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    new_username = request.form.get('username')
-    new_password = request.form.get('password')
-    
-    db_functions.update_user(session['user_id'], new_username, new_password)
-    flash('Profile updated successfully!', 'success')
-    return redirect(url_for('profile'))
 
 # יציאה מהמערכת
 @app.route('/logout')
