@@ -4,18 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h2>Profile</h2>
-        <form id="profile-form">
-            <input type="text" id="username" placeholder="Update Username" required>
-            <input type="password" id="password" placeholder="New Password">
-            <button type="submit">Update Profile</button>
-        </form>
-        <a href="{{ url_for('user_tasks') }}">Back to Tasks</a>
-    </div>
-    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+    <header>
+        <nav>
+            <h1>Your Profile</h1>
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="stats">
+            <h2>Your Statistics</h2>
+            <div class="stat-card">
+                <h3>Unfinished Tasks</h3>
+                <p>{{ stats['unfinished_tasks'] }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Average Tasks Per Month</h3>
+                <p>{{ stats['average_monthly_completed'] }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Completed Tasks</h3>
+                <p>{{ stats['total_completed'] }}</p>
+            </div>
+        </section>
+
+        <section class="actions">
+            <h2>Quick Links</h2>
+            <div class="action-card">
+                <h3>View Tasks</h3>
+                <a href="{{ url_for('user_tasks') }}" class="button">Go to Tasks</a>
+            </div>
+            <div class="action-card">
+                <h3>Settings</h3>
+                <a href="{{ url_for('settings') }}" class="button">Go to Settings</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 Your App. All rights reserved.</p>
+    </footer>
 </body>
 </html>

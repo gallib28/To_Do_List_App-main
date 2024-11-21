@@ -1,0 +1,78 @@
+/* profile.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f5f7;
+    color: #333;
+}
+
+header {
+    background-color: #0052cc;
+    color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header .logout {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+main {
+    padding: 2rem;
+}
+
+.stats, .actions {
+    margin-bottom: 2rem;
+}
+
+.stats h2, .actions h2 {
+    margin-bottom: 1rem;
+}
+
+.stat-card, .action-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card h3, .action-card h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-card p, .action-card a {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.action-card a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #0052cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.action-card a:hover {
+    background-color: #003d99;
+}
+
+footer {
+    background-color: #0052cc;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}

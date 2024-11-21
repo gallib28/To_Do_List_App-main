@@ -72,18 +72,19 @@ def connect_to_db():
         print(f"Error: {err}")
         return False
 
-def create_user(un,password):
+def create_user(username, password):
     conn = connect_to_db()
     if conn is False:
         return False
+
     cursor = conn.cursor(dictionary=True)
-    try :
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        cursor.execute("insert into users(user_username,user_password) values (%s,%s) ",(un,hashed_password.decode('utf-8')))
+    try:
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        cursor.execute("INSERT INTO users (user_username, user_password) VALUES (%s, %s)", (username, hashed_password))
         conn.commit()
         return True
-    except mysql.connector.Error as err:
-        print(f"error: {err} ")
+    except Exception as e:
+        print(f"Error creating user: {e}")
         return False
     finally:
         cursor.close()
@@ -120,25 +121,54 @@ def login_user(username, password):
         return False
 
     cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM users WHERE user_username = %s", (username,))
+        user = cursor.fetchone()
 
-    # בדיקת שם משתמש והבאת הסיסמה
-    cursor.execute("""
-    SELECT user_password FROM users WHERE user_username = %s;
-    """, (username,))
-    result = cursor.fetchone()
+        if not user:
+            print("User not found.")
+            return False
 
-    conn.close()
+        hashed_password = user['user_password']
+        print(f"Fetched hashed password: {hashed_password}")
 
-    if result is None:
-        return False  # משתמש לא נמצא
+        # Check the entered password against the hashed password
+        if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
+            print("Login successful!")
+            return user  # Return user data on successful login
+        else:
+            print("Password does not match.")
+            return False
+    except Exception as e:
+        print(f"Error during login: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
-    hashed_password = result[0]  # הסיסמה המוצפנת
 
-    # בדיקת התאמה של הסיסמה
-    if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
-        return True  # התחברות הצליחה
-    else:
-        return False  # התחברות נכשלה
+def update_existing_password(username, plain_password):
+    conn = connect_to_db()
+    if conn is False:
+        return False
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        hashed_password = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        cursor.execute("UPDATE users SET user_password = %s WHERE user_username = %s", (hashed_password, username))
+        conn.commit()
+        print(f"Password updated successfully for {username}!")
+        return True
+    except Exception as e:
+        print(f"Error updating password: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
 
 
 # getting all tasks created for admin user 
@@ -226,16 +256,16 @@ def get_unfinished_user_tasks(user_id):
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-        select task_id,task_name,task_status 
-        from tasks 
-        where task_status != "done" and user_id= %s ;
-        """,(user_id,))
+        SELECT task_id, task_name, task_status 
+        FROM tasks 
+        WHERE task_status != 'done' AND user_id = %s;
+        """, (user_id,))
         tasks = cursor.fetchall()
         return tasks
     except mysql.connector.Error as err:
-        print(f"error is {err}")
+        print(f"Error fetching unfinished tasks: {err}")
         return False
-    finally :
+    finally:
         cursor.close()
         conn.close()
 
@@ -322,14 +352,65 @@ def set_task_name(name,task_id):
         cursor.close()
         conn.close()
 
+def get_average_monthly_completed(user_id):
+    conn = connect_to_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT AVG(completed_count) AS avg_monthly_completed
+            FROM (
+                SELECT COUNT(*) AS completed_count
+                FROM tasks
+                WHERE user_id = %s AND task_status = 'done'
+                GROUP BY YEAR(task_completion_date), MONTH(task_completion_date)
+            ) AS monthly_counts
+        """, (user_id,))
+        result = cursor.fetchone()
+        return result['avg_monthly_completed'] or 0
+    except Exception as e:
+        print(f"Error fetching average monthly completed tasks: {e}")
+        return 0
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+def mark_task_as_done(task_id, user_id):
+    conn = connect_to_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # עדכון מצב המשימה
+        cursor.execute("UPDATE tasks SET task_status = 'done' WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+
+        # הגדלת מספר המשימות שהושלמו עבור המשתמש
+        cursor.execute("UPDATE users SET completed_tasks_count = completed_tasks_count + 1 WHERE user_id = %s", (user_id,))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating task status: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
 
-
-
-
-
+def get_total_completed_tasks(user_id):
+    conn = connect_to_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT completed_tasks_count FROM users WHERE user_id = %s", (user_id,))
+        result = cursor.fetchone()
+        return result['completed_tasks_count']
+    except Exception as e:
+        print(f"Error fetching total completed tasks: {e}")
+        return 0
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
