@@ -268,7 +268,23 @@ def get_unfinished_user_tasks(user_id):
     finally:
         cursor.close()
         conn.close()
+# returns int count for unfinished 
+def count_unfinished_tasks(user_id):
+    conn = connect_to_db()
+    if conn is False:
+        return 0  # Default to 0 if the connection fails
 
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*) 
+        FROM tasks 
+        WHERE user_id = %s AND task_status != 'completed'
+    """, (user_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    return result[0] if result else 0
 
 # check due under five days
 def check_u5(user_id):
@@ -374,6 +390,34 @@ def get_average_monthly_completed(user_id):
         cursor.close()
         conn.close()
 
+def mark_task_as_completed(task_id, user_id):
+    conn = connect_to_db()
+    cursor = conn.cursor()
+
+    try:
+        # Update the task's status to 'completed'
+        cursor.execute("""
+        UPDATE tasks
+        SET task_status = 'completed'
+        WHERE task_id = %s AND user_id = %s
+        """, (task_id, user_id))
+
+        # Increment the user's completed task count
+        cursor.execute("""
+        UPDATE users
+        SET completed_tasks = completed_tasks + 1
+        WHERE user_id = %s
+        """, (user_id,))
+
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating task status: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def mark_task_as_done(task_id, user_id):

@@ -10,38 +10,43 @@
     <header>
         <nav>
             <h1>Your Profile</h1>
+            <h1>{{ username }}'s Profile</h1>      
             <a href="{{ url_for('logout') }}" class="logout">Logout</a>
         </nav>
     </header>
 
     <main>
-        <section class="stats">
-            <h2>Your Statistics</h2>
-            <div class="stat-card">
-                <h3>Unfinished Tasks</h3>
-                <p>{{ stats['unfinished_tasks'] }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Average Tasks Per Month</h3>
-                <p>{{ stats['average_monthly_completed'] }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Completed Tasks</h3>
-                <p>{{ stats['total_completed'] }}</p>
-            </div>
-        </section>
+        <div class="profile-container">
+            <section class="stats">
+                <h2>Your Statistics</h2>
+                <div class="stat-card">
 
-        <section class="actions">
-            <h2>Quick Links</h2>
-            <div class="action-card">
-                <h3>View Tasks</h3>
-                <a href="{{ url_for('user_tasks') }}" class="button">Go to Tasks</a>
-            </div>
-            <div class="action-card">
-                <h3>Settings</h3>
-                <a href="{{ url_for('settings') }}" class="button">Go to Settings</a>
-            </div>
-        </section>
+                        <h3>Unfinished Tasks</h3>
+                        <p>{{ unfinished_tasks }}</p>
+                    </div>
+                    
+                <div class="stat-card">
+                    <h3>Average Tasks Per Month Completed</h3>
+                    <p>{{ stats['average_monthly_completed'] }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Completed Tasks</h3>
+                    <p>{{ stats['total_completed'] }}</p>
+                </div>
+            </section>
+
+            <section class="actions">
+                <h2>Quick Links</h2>
+                <div class="action-card">
+                    <h3>View Tasks</h3>
+                    <a href="{{ url_for('user_tasks') }}" class="button">Go to Tasks</a>
+                </div>
+                <div class="action-card">
+                    <h3>Settings</h3>
+                    <a href="{{ url_for('settings') }}" class="button">Go to Settings</a>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer>

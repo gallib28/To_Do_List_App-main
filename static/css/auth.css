@@ -1,0 +1,75 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(9, 30, 66, 0.25);
+    width: 350px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: #172b4d;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #dfe1e6;
+    border-radius: 3px;
+    font-size: 1rem;
+    color: #172b4d;
+}
+
+input:focus {
+    outline: none;
+    border-color: #0052cc;
+    box-shadow: 0 0 4px rgba(0, 82, 204, 0.4);
+}
+
+button {
+    padding: 10px;
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0747a6;
+}
+
+.flash-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+}
+
+.flash-message.success {
+    background-color: #e3fcef;
+    color: #006644;
+}
+
+.flash-message.error {
+    background-color: #ffebe6;
+    color: #bf2600;
+}

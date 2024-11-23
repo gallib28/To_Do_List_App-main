@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="static/images/todoLOGO.png" 
+        type="image/x-icon" >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
     <div class="container">
         <img src="{{ url_for('static', filename='images/todoLOGO.png') }}" alt="Logo" class="logo">
         <h2>Login</h2>
-        <!-- תיקון: נוספו action ו-method -->
         <form id="login-form" action="{{ url_for('login') }}" method="post">
             <input type="text" name="username" id="username" placeholder="Username" required>
             <input type="password" name="password" id="password" placeholder="Password" required>

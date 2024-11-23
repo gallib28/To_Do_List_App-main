@@ -30,19 +30,16 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        if not username or not password:
-            return render_template('login.html', error="Please provide both username and password")
-
-        user = db_functions.login_user(username, password)
-        if user:
-            session['user_id'] = user['user_id']
-            session['username'] = user['user_username']
+        # Authenticate the user
+        user_id = db_functions.authenticate_user(username, password)
+        if user_id:
+            session['user_id'] = user_id
+            session['username'] = username
             return redirect(url_for('profile'))
         else:
-            return render_template('login.html', error="Invalid username or password")
+            flash('Invalid username or password', 'danger')
 
     return render_template('login.html')
-
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -54,7 +51,9 @@ def register():
         if not username or not password:
             return render_template('register.html', error="Both fields are required")
 
-        # בדוק אם שם המשתמש כבר קיים
+        print(f"Attempting to register user: {username}")
+
+        # Check if the username already exists
         conn = db_functions.connect_to_db()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE user_username = %s", (username,))
@@ -62,34 +61,45 @@ def register():
         cursor.close()
 
         if existing_user:
+            print("Username already exists.")
             return render_template('register.html', error="Username already exists")
 
-        # צור משתמש חדש
+        # Create a new user
         created = db_functions.create_user(username, password)
         if created:
+            print("User created successfully.")
             flash('Account created successfully! Please log in.', 'success')
             return redirect(url_for('login'))
         else:
+            print("Error creating user.")
             return render_template('register.html', error="An error occurred. Please try again.")
 
     return render_template('register.html')
 
-# דף פרופיל
 @app.route('/profile')
 def profile():
-    if 'user_id' not in session:
+    # Retrieve user ID from the session
+    user_id = session.get('user_id')
+    if not user_id:
+        # Redirect to login if no user ID is found
         return redirect(url_for('login'))
 
-    user_id = session['user_id']
+    # Retrieve username from the session
+    username = session.get('username', 'User')  # Default to 'User' if username is missing
 
-    stats = {
-    'unfinished_tasks': db_functions.get_unfinished_user_tasks(user_id), 
-    'average_monthly_completed': db_functions.get_average_monthly_completed(user_id),
-    'total_completed': db_functions.get_total_completed_tasks(user_id),
-}
+    # Fetch data from the database
+    unfinished_tasks = db_functions.count_unfinished_tasks(user_id)
+    completed_tasks = db_functions.count_completed_tasks(user_id)
+    average_tasks_per_month = db_functions.calculate_average_tasks(user_id)
 
-
-    return render_template('profile.html', stats=stats)
+    # Pass the data to the template
+    return render_template(
+        'profile.html',
+        username=username,
+        unfinished_tasks=unfinished_tasks,
+        completed_tasks=completed_tasks,
+        average_tasks_per_month=average_tasks_per_month
+    )
 
 @app.route('/settings')
 def settings():
