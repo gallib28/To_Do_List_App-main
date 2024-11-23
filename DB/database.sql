@@ -2,33 +2,26 @@ create table users (
 	user_id integer not null primary key AUTO_INCREMENT,
 	user_username varchar(200) not null UNIQUE  ,
 	user_password varchar(200) not null
-);
-create table Tasks(
-	task_id integer NOT null primary key AUTO_INCREMENT  ,
-    
-	task_dueDate DATE  null,
-    
-	task_type char(1) not null,
-	constraint check_task_type check (task_type in ('w','s','p','t')),
-	
-    task_name varchar(100) not null ,
-    constraint check_task_name check (task_name REGEXP '[a-zA-Zא-ת]' ),
-    
-	task_description varchar(100) not null ,
-	constraint check_task_description check (task_description REGEXP  '[a-zA-Zא-ת]' ),
-	
-	task_status varchar(11) not null default "to-do",
-	constraint check_task_status check (task_status in ("in progress","done","To-do")),
-	
-	user_id integer , 
-	FOREIGN KEY (user_id) references users(user_id) ON DELETE CASCADE ,
-	
-    parent_task_id INTEGER default null,
-    FOREIGN KEY (parent_task_id) REFERENCES Tasks(task_id) ON DELETE CASCADE  ,
-    
-    task_priority char(1) not null , 
-    constraint check_task_priority check (task_priority in ('1','2','3'))
-);
+) ENGINE=InnoDB;
+CREATE TABLE tasks (
+    task_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    task_dueDate DATE NULL,
+    task_type CHAR(1) NOT NULL,
+    CONSTRAINT check_task_type CHECK (task_type IN ('w', 's', 'p', 't')),
+    task_name VARCHAR(100) NOT NULL,
+    CONSTRAINT check_task_name CHECK (task_name REGEXP '[a-zA-Zא-ת]'),
+    task_description VARCHAR(100) NOT NULL,
+    CONSTRAINT check_task_description CHECK (task_description REGEXP '[a-zA-Zא-ת]'),
+    task_status VARCHAR(11) NOT NULL DEFAULT "to-do",
+    CONSTRAINT check_task_status CHECK (task_status IN ("in progress", "done", "To-do")),
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    parent_task_id INTEGER DEFAULT NULL,
+    FOREIGN KEY (parent_task_id) REFERENCES tasks(task_id) ON DELETE CASCADE,
+    task_priority CHAR(1) NOT NULL,
+    CONSTRAINT check_task_priority CHECK (task_priority IN ('1', '2', '3'))
+) ENGINE=InnoDB;
+
 insert into users (user_username,user_password) values 
 ('gallib','gallib'),
 ('shahar','shahar') 

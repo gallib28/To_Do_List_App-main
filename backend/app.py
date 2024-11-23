@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import db_functions
 import os 
 import bcrypt
+
 app = Flask(
     __name__,
     template_folder='../templates',  # מיקום תיקיית התבניות
