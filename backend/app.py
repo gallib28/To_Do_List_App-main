@@ -101,21 +101,51 @@ def profile():
         stats=stats
     )
 
-@app.route('/get_task_details/<int:task_id>', methods=['GET'])
-def get_task_details(task_id):
+@app.route('/task/<int:task_id>', methods=['GET'])
+def task_details(task_id):
+    # שליפת פרטי המשימה לפי מזהה המשימה
     task = db_functions.get_task_by_id(task_id)
-    if task:
-        return jsonify(task)
+    
+    # אם המשימה לא נמצאה, מחזירים שגיאת 404
+    if not task:
+        return abort(404, description="Task not found")
+    
+    # בדיקה אם יש מפתח 'parent_task_id' במשימה
+    if 'parent_task_id' in task:
+        sub_tasks = db_functions.get_sub_tasks_by_parent_id(task_id)  # שליפת תתי-משימות
     else:
-        return jsonify({'error': 'Task not found'}), 404
+        sub_tasks = []  # אם אין תתי-משימות, מחזירים רשימה ריקה
 
+    # מחזירים את דף פרטי המשימה עם המשימה ותתי-המשימות
+    return render_template('task_details.html', task=task, sub_tasks=sub_tasks)
+
+@app.route('/update_theme', methods=['POST'])
+def update_theme():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/login')  # אם אין משתמש מחובר, להפנות להתחברות
+
+    theme_color = request.form.get('theme_color')
+    if not theme_color:
+        return "Theme color not provided", 400
+
+    success = db_functions.update_user_theme(user_id, theme_color)
+    if success:
+        return redirect('/settings')  # חזרה לעמוד ההגדרות
+    else:
+        return "Failed to update theme", 500
 
 @app.route('/settings')
 def settings():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    user_id = session.get('user_id')  # נניח שאתה משתמש ב-session
+    if not user_id:
+        return redirect('/login')  # נשלח לדף התחברות אם אין משתמש מחובר
 
-    return render_template('settings.html')
+    user = db_functions.get_user_by_id(user_id)  # שלוף את פרטי המשתמש
+    if not user:
+        return "User not found", 404
+
+    return render_template('settings.html', user=user)
 
 # דף המשימות של המשתמש
 @app.route('/user_tasks')
@@ -154,59 +184,127 @@ def add_task():
     subtasks = db_functions.get_subtasks(task_name, task_description)
     return jsonify({"success": True, "suggestions": subtasks})
 
+
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/login')
+
+    if db_functions.delete_user_db(user_id):
+        session.clear()
+        flash("Account deleted successfully!", "success")
+        return redirect('/register')
+    else:
+        flash("Error deleting account.", "error")
+        return redirect('/settings')
+
 # יציאה מהמערכת
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
-    session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
+    session.clear()  # ניקוי session
+    return redirect('/login')
+
+
+
+
+
+
+VALID_STATUSES = ["to-do", "in progress", "done"] 
 
 @app.route('/update_task_status/<int:task_id>', methods=['POST'])
 def update_task_status(task_id):
-    data = request.json
-    new_status = data.get('status')
+    data = request.get_json()
+    new_status = data.get("status")
+    if new_status not in VALID_STATUSES:
+        return jsonify({"error": "Invalid status"}), 400
 
-    print(f"New status received: {new_status}")  # Debug log
+    if new_status not in VALID_STATUSES:
+        return jsonify({"error": "Invalid status"}), 400
 
-    # Normalize status values
-    valid_statuses = {"to-do": "To-do", "in-progress": "in progress", "done": "done"}
-    if new_status not in valid_statuses:
-        print("Invalid status received!")  # Debug invalid status
-        return jsonify({'error': 'Invalid status'}), 400
 
-    # Convert the status to match database constraints
-    new_status = valid_statuses[new_status]
-
-    # Update the task status in the database
     success = db_functions.set_task_status(new_status, task_id)
     if success:
+        print(f"Task {task_id} updated to status {new_status} successfully.")
         return jsonify({'success': True})
     else:
+        print(f"Failed to update task {task_id} to status {new_status}.")
         return jsonify({'error': 'Failed to update task status'}), 500
 
 
+@app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    if request.method == 'GET':
+        # Fetch the task details to populate the form
+        task = db_functions.get_task_by_id(task_id)
+        if not task:
+            return f"Task with ID {task_id} not found", 404
+
+        return render_template('edit_task.html', task=task)
+
+    elif request.method == 'POST':
+        # Handle the form submission and update the task
+        task_name = request.form.get('task_name')
+        description = request.form.get('description')
+        due_date = request.form.get('due_date')
+        priority = request.form.get('priority')
+        status = request.form.get('status')
+
+        try:
+            db_functions.update_task_in_db(task_id, task_name, description, due_date, priority, status)
+            print(f"Task {task_id} updated successfully.")
+            return redirect(f'/task/{task_id}')  # Redirect to the task details page
+        except Exception as e:
+            print(f"Error updating task: {e}")
+            return "Failed to update task", 500
+
+
+@app.route('/update_username', methods=['POST'])
+def update_username():
+    username = request.form['username']
+    user_id = session.get('user_id')
+    if db_functions.update_username_in_db(user_id, username):  # Implement this function
+        flash("Username updated successfully!")
+    else:
+        flash("Error updating username.")
+    return redirect('/settings')
+
 @app.route('/update_password', methods=['POST'])
 def update_password():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    username = session.get('username')  # השם משתמש מתוך session
+    old_password = request.form.get('old_password')  # סיסמה ישנה
+    new_password = request.form.get('new_password')  # סיסמה חדשה
 
-    new_password = request.form.get('new_password')
+    if not username or not old_password or not new_password:
+        flash("All fields are required.", "error")
+        return redirect('/settings')
 
-    if not new_password:
-        flash('Password cannot be empty.', 'error')
-        return redirect(url_for('profile'))
+    try:
+        # קריאה לפונקציה לעדכון סיסמה
+        success = db_functions.update_existing_password(username, old_password, new_password)
+        if success:
+            flash("Password updated successfully.", "success")
+        else:
+            flash("Old password does not match or error occurred.", "error")
+    except Exception as e:
+        flash(f"Error updating password: {e}", "error")
 
-    username = session.get('username')
-    updated = db_functions.update_existing_password(username, new_password)
-
-    if updated:
-        flash('Password updated successfully!', 'success')
-    else:
-        flash('Error updating password. Please try again.', 'danger')
-
-    return redirect(url_for('profile'))
+    return redirect('/settings')
 
 
+@app.route('/update_task/<int:task_id>', methods=['POST'])
+def update_task(task_id):
+    # שליפת הנתונים מהטופס
+    task_name = request.form.get('task_name')
+    description = request.form.get('description')
+    due_date = request.form.get('due_date')
+    priority = request.form.get('priority')
+    status = request.form.get('status')
+    
+    # עדכון המשימה בבסיס הנתונים
+    db_functions.update_task_in_db(task_id, task_name, description, due_date, priority, status)
+    return redirect(url_for('task_details', task_id=task_id))
 
 
 if __name__ == '__main__':

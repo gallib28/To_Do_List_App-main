@@ -4,33 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+    <link rel="stylesheet" href="/static/css/settings.css">
 </head>
-<body>
-    <header>
-        <nav>
-            <h1>Settings</h1>
-            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
-        </nav>
-    </header>
-
-    <main>
-        <section class="settings">
-            <h2>Update Your Information</h2>
-            <form action="{{ url_for('update_profile') }}" method="POST">
-                <label for="username">Update Username:</label>
-                <input type="text" name="username" id="username" placeholder="New Username" required>
-
-                <label for="password">Update Password:</label>
-                <input type="password" name="password" id="password" placeholder="New Password" required>
-
-                <button type="submit" class="button">Save Changes</button>
-            </form>
-        </section>
-    </main>
-
-    <footer>
-        <p>© 2024 Your App. All rights reserved.</p>
-    </footer>
+<body class="theme-{{ theme_color }}">
+    <div class="container">
+        <h1>Settings</h1>
+        <form action="/update_username" method="POST">
+            <label for="username">Update Username:</label>
+            <input type="text" id="username" name="username" value="{{ user['username'] }}" required>
+            <button type="submit">Update Username</button>
+        </form>
+        <form action="/update_password" method="POST">
+            <label for="old_password">Old Password:</label>
+            <input type="password" id="old_password" name="old_password" required>
+            <label for="new_password">New Password:</label>
+            <input type="password" id="new_password" name="new_password" required>
+            <button type="submit">Update Password</button>
+        </form>
+        
+        
+        <form action="/logout" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+        <form action="/delete_account" method="POST">
+            <button type="submit" style="background-color: red; color: white;">Delete Account</button>
+        </form>
+        <div class="button-container">
+            <a href="/profile" class="button back-to-profile">Back to Profile</a>
+        </div>        
+    </div>
 </body>
 </html>

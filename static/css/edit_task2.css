@@ -1,0 +1,157 @@
+/* General styling for the page */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7;
+    margin: 0;
+    padding: 0;
+    color: #172b4d;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+/* Main container for the form */
+.container {
+    background: color #ecb6b6 s;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    max-width: 800px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: left; 
+    color: #0052cc; 
+    font-size: 1.8rem;
+    margin: 0;
+    padding: 10px 10px 10px 0; 
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Labels for form inputs */
+label {
+    font-size: 1rem;
+    color: #0052cc;
+    font-weight: bold;
+}
+
+/* Input fields and textareas */
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #dfe1e6;
+    border-radius: 5px;
+    color: #172b4d;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #0052cc;
+    box-shadow: 0 0 5px rgba(0, 82, 204, 0.4);
+    outline: none;
+}
+
+
+
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* Space between buttons */
+    gap: 50px; /* Space between buttons */
+}
+
+/* Button styling */
+.button {
+    display: inline-block;
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    border-radius: 8px; /* Rounded corners */
+    padding: 10px 20px; /* Adjusted padding for better spacing */
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Hover effect */
+.button:hover {
+    background-color: #003d99;
+    transform: translateY(-3px); /* Slight "lift" effect */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+}
+
+/* Active effect for when button is clicked */
+.button:active {
+    background-color: #003070;
+    transform: translateY(2px); /* Button appears "pressed" */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow when clicked */
+}
+
+/* Styling the back button separately if needed */
+.button-back {
+    background-color: #f0f0f0; /* Light gray background */
+    color: #0052cc;
+    border: 1px solid #dfe1e6; /* Soft border for separation */
+}
+
+.button-back:hover {
+    background-color: #e0e0e0;
+    color: #003d99;
+    transform: translateY(-3px);
+}
+
+/* Back to Task Details link */
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+a {
+    text-decoration: none;
+    font-size: 1rem;
+    color: #0052cc;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #003d99;
+}
+
+/* Align elements inside the form */
+form > div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add spacing between the label and input fields */
+label + input, label + textarea, label + select {
+    margin-top: 10px;
+}
+.title-container {
+    display: flex;
+    justify-content: flex-start; /* מיקום התוכן בצד ימין */
+    padding: 20px 20px; /* התאמת הרווחים */
+    justify-content: left
+}
+
+.page-title {
+    color: #0052cc;
+    font-size: 1.8rem;
+    margin: 0;
+}

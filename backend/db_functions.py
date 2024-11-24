@@ -3,7 +3,7 @@ import bcrypt
 from dotenv import load_dotenv
 import os
 import openai
-
+import pymysql
 
 
 
@@ -141,17 +141,34 @@ def login_user(username, password):
         cursor.close()
         conn.close()
 
-def update_existing_password(username, plain_password):
+def update_existing_password(username, old_password, new_password):
     conn = connect_to_db()
-    if conn is False:
+    if not conn:
         return False
 
     cursor = conn.cursor(dictionary=True)
     try:
-        hashed_password = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        cursor.execute("UPDATE users SET user_password = %s WHERE user_username = %s", (hashed_password, username))
+        # שליפת הסיסמה המוצפנת
+        cursor.execute("SELECT user_password FROM users WHERE user_username = %s", (username,))
+        user = cursor.fetchone()
+
+        if not user:
+            print(f"User '{username}' not found.")
+            return False
+
+        # בדיקת סיסמה ישנה
+        hashed_password = user['user_password']
+        if not bcrypt.checkpw(old_password.encode('utf-8'), hashed_password.encode('utf-8')):
+            print("Old password does not match.")
+            return False
+
+        # הצפנת הסיסמה החדשה
+        hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # עדכון סיסמה במסד הנתונים
+        cursor.execute("UPDATE users SET user_password = %s WHERE user_username = %s", (hashed_new_password, username))
         conn.commit()
-        print(f"Password updated successfully for {username}!")
+        print(f"Password updated successfully for {username}.")
         return True
     except Exception as e:
         print(f"Error updating password: {e}")
@@ -159,6 +176,9 @@ def update_existing_password(username, plain_password):
     finally:
         cursor.close()
         conn.close()
+
+
+
 
 
 
@@ -182,26 +202,7 @@ def get_tasks():
         cursor.close()
         conn.close()
 
-def get_task_by_id(task_id):
-    conn = connect_to_db()
-    if conn is False:
-        return None  # Return None if the database connection fails
 
-    cursor = conn.cursor(dictionary=True)  # Use dictionary=True for easy JSON conversion
-    try:
-        cursor.execute("""
-            SELECT task_id, task_name, task_description, task_dueDate, task_status, task_priority, task_type, user_id, parent_task_id
-            FROM tasks
-            WHERE task_id = %s;
-        """, (task_id,))
-        task = cursor.fetchone()  # Fetch the task
-        return task
-    except Exception as e:
-        print(f"Error fetching task by ID: {e}")  # Log the error
-        return None
-    finally:
-        cursor.close()
-        conn.close()
 
 
 # get specific user tasks
@@ -244,24 +245,25 @@ def delete_task(task_id):
         conn.close()
 
 
-def delete_user(user_id):
+def delete_user_db(user_id):
     conn = connect_to_db()
-    if conn is False:
+    if not conn:
         return False
+
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("""
-        delete from users 
-        where user_id = %s ;
-        """, (user_id,))
+        cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
         conn.commit()
+        print(f"User {user_id} deleted successfully.")
         return True
-    except mysql.connector.Error as err:
-        print(f"error: {err} ")
+    except Exception as e:
+        print(f"Error deleting user: {e}")
         return False
-    finally :
+    finally:
         cursor.close()
         conn.close()
+
+
 # getting all user unfinished tasks
 def get_unfinished_user_tasks(user_id):
     conn = connect_to_db()
@@ -327,23 +329,29 @@ def check_u5(user_id):
 def set_task_status(new_status, task_id):
     conn = connect_to_db()
     if conn is False:
+        print("Database connection failed.")
         return False
 
     cursor = conn.cursor()
     try:
+        print(f"Updating task {task_id} to status {new_status}.")
         cursor.execute("""
             UPDATE tasks
             SET task_status = %s
             WHERE task_id = %s;
         """, (new_status, task_id))
         conn.commit()
+        print(f"Task {task_id} updated successfully.")
         return True
     except Exception as e:
-        print(f"Error updating task status: {e}")  # Debug
+        print(f"Error updating task status: {e}")
         return False
     finally:
         cursor.close()
         conn.close()
+
+
+
 
 
 def set_task_description(string,task_id):
@@ -409,56 +417,33 @@ def get_average_monthly_completed(user_id):
         conn.close()
 
 
-def mark_task_as_completed(task_id, user_id):
+def update_username_in_db(user_id, username):
     conn = connect_to_db()
-    cursor = conn.cursor()
-
-    try:
-        # Update the task's status to 'completed'
-        cursor.execute("""
-        UPDATE tasks
-        SET task_status = 'completed'
-        WHERE task_id = %s AND user_id = %s
-        """, (task_id, user_id))
-
-        # Increment the user's completed task count
-        cursor.execute("""
-        UPDATE users
-        SET completed_tasks = completed_tasks + 1
-        WHERE user_id = %s
-        """, (user_id,))
-
-        conn.commit()
-        return True
-    except Exception as e:
-        print(f"Error updating task status: {e}")
-        conn.rollback()
+    if not conn:
         return False
-    finally:
-        cursor.close()
-        conn.close()
 
-
-def mark_task_as_done(task_id, user_id):
-    conn = connect_to_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        # עדכון מצב המשימה
-        cursor.execute("UPDATE tasks SET task_status = 'done' WHERE task_id = %s AND user_id = %s", (task_id, user_id))
-
-        # הגדלת מספר המשימות שהושלמו עבור המשתמש
-        cursor.execute("UPDATE users SET completed_tasks_count = completed_tasks_count + 1 WHERE user_id = %s", (user_id,))
-        
+        query = "UPDATE users SET user_username = %s WHERE user_id = %s"
+        cursor.execute(query, (username, user_id))
         conn.commit()
         return True
     except Exception as e:
-        print(f"Error updating task status: {e}")
+        print(f"Error updating username: {e}")
         return False
     finally:
         cursor.close()
         conn.close()
 
 
+
+
+def get_sub_tasks_by_parent_id(parent_id):
+    conn= connect_to_db()
+    cursor = conn.cursor(dictionary=True)
+    query = "SELECT * FROM tasks WHERE parent_task_id = %s"
+    cursor.execute(query, (parent_id,))
+    return cursor.fetchall()
 
 
 def get_total_completed_tasks(user_id):
@@ -480,6 +465,83 @@ def get_total_completed_tasks(user_id):
         conn.close()
 
 
+def get_user_by_id(user_id):
+    conn = connect_to_db()
+    if conn is False:
+        return None  # או תזרוק שגיאה מתאימה
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = "SELECT user_id, user_username AS username FROM users WHERE user_id = %s"
+        cursor.execute(query, (user_id,))
+        user = cursor.fetchone()
+        return user
+    except Exception as e:
+        print(f"Error fetching user by ID: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_user_theme(user_id, theme_color):
+    conn = connect_to_db()
+    if conn is False:
+        return False
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            UPDATE users
+            SET theme_color = %s
+            WHERE user_id = %s
+        """, (theme_color, user_id))
+        conn.commit()
+        print(f"Theme updated successfully to {theme_color} for user {user_id}.")
+        return True
+    except Exception as e:
+        print(f"Error updating theme: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_task_by_id(task_id):
+    conn= connect_to_db()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM tasks WHERE task_id = %s"
+        cursor.execute(query, (task_id,))
+        task = cursor.fetchone()  # שליפת שורת נתונים אחת
+        return task
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_task_in_db(task_id, task_name, description, due_date, priority, status):
+    conn = connect_to_db()  # Connect to the database
+    if not conn:
+        raise Exception("Database connection failed.")
+
+    try:
+        # Use the correct syntax for MySQL cursor
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            UPDATE tasks
+            SET task_name = %s, task_description = %s, task_dueDate = %s, task_priority = %s, task_status = %s
+            WHERE task_id = %s
+        """
+        cursor.execute(query, (task_name, description, due_date, priority, status, task_id))
+        conn.commit()  # Commit the changes
+        print(f"Task {task_id} updated successfully.")
+    except Exception as e:
+        print(f"Error updating task in database: {e}")
+        conn.rollback()  # Rollback in case of error
+        raise
+    finally:
+        cursor.close()  # Close the cursor
+        conn.close()  # Close the connection
 
 
 
@@ -487,6 +549,18 @@ def get_total_completed_tasks(user_id):
 
 
 
+
+def get_sub_tasks_by_parent_id(parent_task_id):
+    conn= connect_to_db()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM tasks WHERE parent_task_id = %s"
+        cursor.execute(query, (parent_task_id,))
+        sub_tasks = cursor.fetchall()  # שליפת כל התוצאות
+        return sub_tasks
+    finally:
+        cursor.close()
+        conn.close()
 
 
 

@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="icon" href="static/images/todoLOGO.png" 
+    type="image/x-icon" >
 </head>
-<body>
+<body class="theme-{{ theme_color }}">
     <header>
         <nav>
             <h1>{{ username }}'s Profile</h1>      
@@ -34,7 +36,6 @@
             </section>
 
             <section class="actions">
-                <h2>Quick Links</h2>
                 <div class="action-card">
                     <h3>View Tasks</h3>
                     <a href="{{ url_for('user_tasks') }}" class="button">Go to Tasks</a>
@@ -47,8 +48,6 @@
         </div>
     </main>
 
-    <footer>
-        <p>© 2024 Your App. All rights reserved.</p>
-    </footer>
+    
 </body>
 </html>

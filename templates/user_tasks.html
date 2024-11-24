@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Tasks</title>
+    <title>user's Tasks</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
+    <link rel="icon" href="static/images/todoLOGO.png" 
+        type="image/x-icon" >
 </head>
-<body>
-    <div class="container">
+<body class="theme-{{ theme_color }}">
+        <div class="container">
         <h2 style="text-align: center;">My Tasks</h2>
 
         <!-- Kanban Board -->
@@ -61,7 +63,11 @@
 
     <!-- Add Task Button -->
     <button id="add-task-btn" class="button">Add Task</button>
-
+    <div class="button-container">
+        <!-- Add this button for going back to the profile -->
+        <a href="/profile" class="button back-button">Back to Profile</a>
+    </div>
+    
     <script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
 </body>
 </html>

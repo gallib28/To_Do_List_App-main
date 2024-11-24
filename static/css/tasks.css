@@ -80,3 +80,48 @@
     right: 20px;
     z-index: 1000;
 }
+.kanban-tasks {
+    pointer-events: all; /* מאפשר אינטראקציה */
+}
+
+.kanban-tasks {
+    pointer-events: all;
+    position: relative;
+    min-height: 100px; /* גובה מינימלי */
+    border: 2px dashed transparent;
+}
+
+.kanban-tasks.dragover {
+    border-color: #007bff; /* שינוי צבע גבול בעת גרירה */
+    background-color: #e7f3ff; /* רקע קל */
+}
+.kanban-task {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.kanban-task:hover {
+    background-color: #d6eaff; /* Highlight effect */
+}
+.button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start; /* Aligns button to the left */
+}
+
+.back-button {
+    background-color: #0052cc;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    display: inline-block;
+}
+
+.back-button:hover {
+    background-color: #003d99;
+    transform: scale(1.05);
+}

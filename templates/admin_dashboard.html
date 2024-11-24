@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="static/images/todoLOGO.png" 
+    type="image/x-icon" >
 </head>
-<body>
+<body class="theme-{{ theme_color }}">
     <div class="container">
         <h2>Admin Dashboard</h2>
         <ul id="admin-tasks-list"></ul>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks_details.css') }}">
+</head>
+<body class="theme-{{ theme_color }}">
+        <div class="container">
+        <h1>Task Details</h1>
+        <div class="task-details">
+            <p><strong>Task Name:</strong> {{ task.task_name }}</p>
+            <p><strong>Description:</strong> {{ task.task_description }}</p>
+            <p><strong>Due Date:</strong> {{ task.task_dueDate }}</p>
+            <p><strong>Priority:</strong> {{ task.task_priority }}</p>
+            <p><strong>Status:</strong> {{ task.task_status }}</p>
+        </div>
+
+        <div class="sub-tasks">
+            <h2>Sub-Tasks</h2>
+            {% if sub_tasks %}
+                {% for sub_task in sub_tasks %}
+                <div class="sub-task">
+                    <p><strong>{{ sub_task.task_name }}</strong></p>
+                    <p>{{ sub_task.task_description }}</p>
+                    <a href="/task/{{ sub_task.task_id }}">View Sub-Task</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No Sub-Tasks available.</p>
+            {% endif %}
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('edit_task', task_id=task.task_id) }}" class="button">Edit Task</a>
+            <a href="{{ url_for('user_tasks') }}" class="button">Back to Tasks</a>
+        </div>
+    </div>
+</body>
+</html>

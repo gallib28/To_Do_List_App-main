@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
+    <link rel="stylesheet" href="/static/css/edit_task2.css">
+</head>
+<body class="theme-{{ theme_color }}">
+    <div class="container">
+        <h1>Edit Task</h1>
+        <form action="/edit_task/{{ task['task_id'] }}" method="POST">
+            <label for="task_name">Task Name:</label>
+            <input type="text" id="task_name" name="task_name" value="{{ task['task_name'] }}" required>
+        
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required>{{ task['task_description'] }}</textarea>
+        
+            <label for="due_date">Due Date:</label>
+            <input type="date" id="due_date" name="due_date" value="{{ task['task_dueDate'] }}" required>
+        
+            <label for="priority">Priority:</label>
+            <input type="number" id="priority" name="priority" value="{{ task['task_priority'] }}" required>
+        
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="to-do" {% if task['task_status'] == 'to-do' %}selected{% endif %}>To-Do</option>
+                <option value="in progress" {% if task['task_status'] == 'in progress' %}selected{% endif %}>In Progress</option>
+                <option value="done" {% if task['task_status'] == 'done' %}selected{% endif %}>Done</option>
+            </select>
+        
+            <div class="button-container">
+                <a href="/task/{{ task['task_id'] }}" class="button button-back">Back to Task Details</a>
+                <button type="submit" class="button save-button">Save</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

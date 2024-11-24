@@ -7,8 +7,9 @@
     <link rel="icon" href="static/images/todoLOGO.png" 
         type="image/x-icon" >
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
 </head>
-<body>
+<body class="theme-{{ user['theme_color'] | default('light') }}">
     <div class="container">
         <img src="{{ url_for('static', filename='images/todoLOGO.png') }}" alt="Logo" class="logo">
         <h2>Login</h2>

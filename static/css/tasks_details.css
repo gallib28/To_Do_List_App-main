@@ -1,0 +1,106 @@
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7;
+    margin: 0;
+    padding: 0;
+    color: #172b4d;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    max-width: 800px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #0052cc;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.task-details {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.task-details strong {
+    font-size: 1rem;
+    color: #0052cc;
+}
+
+.task-details p {
+    font-size: 1rem;
+    margin: 0;
+    color: #172b4d;
+}
+
+.sub-tasks {
+    margin-top: 20px;
+}
+
+.sub-tasks h2 {
+    font-size: 1.2rem;
+    color: #0052cc;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #dfe1e6;
+    padding-bottom: 5px;
+}
+
+.sub-task {
+    background-color: #f8f9fa;
+    border: 1px solid #dfe1e6;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #172b4d;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 30px;
+}
+
+a {
+    text-decoration: none;
+    font-size: 1rem;
+    color: #0052cc;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #003d99;
+}
+
+.button {
+    display: inline-block;
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 20px;
+}
+
+.button:hover {
+    background-color: #003d99;
+    transform: scale(1.05);
+}
