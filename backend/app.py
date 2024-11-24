@@ -30,10 +30,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Authenticate the user
-        user_id = db_functions.authenticate_user(username, password)
-        if user_id:
-            session['user_id'] = user_id
+        # Use the login_user function
+        user = db_functions.login_user(username, password)
+        if user:
+            session['user_id'] = user['user_id']  # Extract the integer user_id
             session['username'] = username
             return redirect(url_for('profile'))
         else:
@@ -76,30 +76,39 @@ def register():
 
     return render_template('register.html')
 
+
 @app.route('/profile')
 def profile():
-    # Retrieve user ID from the session
     user_id = session.get('user_id')
-    if not user_id:
-        # Redirect to login if no user ID is found
+    if not isinstance(user_id, int):  # Ensure user_id is an integer
+        print(f"Invalid user_id: {user_id}")
         return redirect(url_for('login'))
 
-    # Retrieve username from the session
-    username = session.get('username', 'User')  # Default to 'User' if username is missing
-
-    # Fetch data from the database
+    username = session.get('username', 'User')
     unfinished_tasks = db_functions.count_unfinished_tasks(user_id)
-    completed_tasks = db_functions.count_completed_tasks(user_id)
-    average_tasks_per_month = db_functions.calculate_average_tasks(user_id)
+    completed_tasks = db_functions.get_total_completed_tasks(user_id)
+    average_tasks_per_month = db_functions.get_average_monthly_completed(user_id)
 
-    # Pass the data to the template
+    stats = {
+    'average_monthly_completed': average_tasks_per_month,
+    'total_completed': completed_tasks,
+    }
+
     return render_template(
         'profile.html',
         username=username,
         unfinished_tasks=unfinished_tasks,
-        completed_tasks=completed_tasks,
-        average_tasks_per_month=average_tasks_per_month
+        stats=stats
     )
+
+@app.route('/get_task_details/<int:task_id>', methods=['GET'])
+def get_task_details(task_id):
+    task = db_functions.get_task_by_id(task_id)
+    if task:
+        return jsonify(task)
+    else:
+        return jsonify({'error': 'Task not found'}), 404
+
 
 @app.route('/settings')
 def settings():
@@ -129,10 +138,19 @@ def add_task():
     task_due_date = data.get('task_due_date')
     task_priority = data.get('task_priority')
 
-    # יצירת המשימה בבסיס הנתונים
-    db_functions.create_task(task_name, task_description, task_due_date, "todo", "to-do", session['user_id'], None, task_priority)
+    # Save task to database
+    db_functions.create_task(
+        name=task_name,
+        description=task_description,
+        due_date=task_due_date,
+        task_type="todo",
+        task_status="to-do",
+        user_id=session['user_id'],
+        parent_task_id=None,
+        task_priority=task_priority
+    )
 
-    # הצעת תתי-משימות
+    # Get GPT subtask suggestions
     subtasks = db_functions.get_subtasks(task_name, task_description)
     return jsonify({"success": True, "suggestions": subtasks})
 
@@ -143,6 +161,28 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/update_task_status/<int:task_id>', methods=['POST'])
+def update_task_status(task_id):
+    data = request.json
+    new_status = data.get('status')
+
+    print(f"New status received: {new_status}")  # Debug log
+
+    # Normalize status values
+    valid_statuses = {"to-do": "To-do", "in-progress": "in progress", "done": "done"}
+    if new_status not in valid_statuses:
+        print("Invalid status received!")  # Debug invalid status
+        return jsonify({'error': 'Invalid status'}), 400
+
+    # Convert the status to match database constraints
+    new_status = valid_statuses[new_status]
+
+    # Update the task status in the database
+    success = db_functions.set_task_status(new_status, task_id)
+    if success:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'error': 'Failed to update task status'}), 500
 
 
 @app.route('/update_password', methods=['POST'])

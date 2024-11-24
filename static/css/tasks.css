@@ -1,68 +1,82 @@
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f7f8fa;
-    margin: 0;
-    padding: 0;
-}
-
+/* General container styling */
 .container {
-    padding: 20px;
-    max-width: 900px;
+    padding: 10px;
+    max-width: 1200px;
     margin: auto;
 }
 
-h2 {
-    font-size: 1.8rem;
-    color: #172b4d;
-    margin-bottom: 20px;
+/* Kanban Board Styling */
+.kanban-board {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
 }
 
-form {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-form input, form button {
-    padding: 10px;
+.kanban-column {
+    flex: 1;
+    background-color: #f4f5f7;
     border: 1px solid #dfe1e6;
-    border-radius: 3px;
+    border-radius: 5px;
+    padding: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
-form input:focus {
-    outline: none;
-    border-color: #0052cc;
-}
-
-form button {
-    background-color: #0052cc;
-    color: white;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s;
-}
-
-form button:hover {
-    background-color: #0747a6;
-}
-
-#tasks-list {
-    list-style: none;
-    padding: 0;
-}
-
-#tasks-list li {
-    background-color: white;
-    border: 1px solid #dfe1e6;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 3px;
-    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.1);
-}
-
-a {
+.kanban-column h3 {
+    text-align: center;
     color: #0052cc;
-    text-decoration: none;
     font-weight: bold;
+}
+
+/* Task box styling */
+.kanban-task {
+    background-color: #f8f9fa; /* Light blue background */
+    border: 1px solid black; /* Blue border */
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    color: black; /* Darker text for contrast */
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover effect for tasks */
+.kanban-task:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #bfdbfe; /* Slightly darker blue */
+}
+
+/* Button Styling */
+.button {
+    background-color: #3b82f6; /* Blue background */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+    background-color: #2563eb; /* Darker blue on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.button:active {
+    background-color: #1d4ed8; /* Even darker blue when clicked */
+}
+
+/* Add Task button at the bottom */
+#add-task-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
 }

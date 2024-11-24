@@ -1,9 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Main JavaScript loaded.");
+    const addTaskBtn = document.getElementById("add-task-btn");
+    const addTaskPopup = document.getElementById("add-task-popup");
+    const closePopupBtn = document.getElementById("close-popup-btn");
+    const addTaskForm = document.getElementById("add-task-form");
 
-    const form = document.getElementById("add-task-form");
+    // Show the popup when the "Add Task" button is clicked
+    addTaskBtn.addEventListener("click", () => {
+        addTaskPopup.classList.remove("hidden");
+    });
 
-    form.addEventListener("submit", async (e) => {
+    // Close the popup
+    closePopupBtn.addEventListener("click", () => {
+        addTaskPopup.classList.add("hidden");
+    });
+
+    // Handle task submission
+    addTaskForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const taskName = document.getElementById("task_name").value;
@@ -11,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const taskDueDate = document.getElementById("task_due_date").value;
         const taskPriority = document.getElementById("task_priority").value;
 
-        // שליחת המשימה לשרת
+        // Send the task data to the server
         const response = await fetch("/add_task", {
             method: "POST",
             headers: {
@@ -27,17 +39,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const result = await response.json();
 
-        // בדיקת התשובה מהשרת ושאילת המשתמש אם הוא רוצה הצעה לתתי-משימות
-        if (confirm("Would you like suggestions for subtasks?")) {
+        // Check server response and show GPT suggestions
+        if (result.success) {
             const subtasks = result.suggestions;
-            if (subtasks.length > 0) {
-                const selectedSubtasks = prompt(`Suggested subtasks:\n${subtasks.join("\n")}\n\nPlease select the subtasks you want to add (e.g., 1,2,3):`);
-                if (selectedSubtasks) {
-                    alert(`You have selected the following subtasks:\n${selectedSubtasks}`);
-                }
+            const userChoice = confirm(
+                `Suggested subtasks:\n${subtasks.join("\n")}\n\nDo you want to add these subtasks?`
+            );
+            if (userChoice) {
+                alert("Subtasks added successfully!");
             } else {
-                alert("No suggestions were found.");
+                alert("No subtasks were added.");
             }
         }
+
+        // Close the popup
+        addTaskPopup.classList.add("hidden");
+        // Optionally, refresh the table or update the UI
+        location.reload();
     });
 });

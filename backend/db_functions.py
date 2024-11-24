@@ -130,22 +130,16 @@ def login_user(username, password):
             return False
 
         hashed_password = user['user_password']
-        print(f"Fetched hashed password: {hashed_password}")
 
         # Check the entered password against the hashed password
         if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
-            print("Login successful!")
-            return user  # Return user data on successful login
+            return {'user_id': int(user['user_id'])}  # Explicitly convert user_id to integer
         else:
             print("Password does not match.")
             return False
-    except Exception as e:
-        print(f"Error during login: {e}")
-        return False
     finally:
         cursor.close()
         conn.close()
-
 
 def update_existing_password(username, plain_password):
     conn = connect_to_db()
@@ -188,6 +182,26 @@ def get_tasks():
         cursor.close()
         conn.close()
 
+def get_task_by_id(task_id):
+    conn = connect_to_db()
+    if conn is False:
+        return None  # Return None if the database connection fails
+
+    cursor = conn.cursor(dictionary=True)  # Use dictionary=True for easy JSON conversion
+    try:
+        cursor.execute("""
+            SELECT task_id, task_name, task_description, task_dueDate, task_status, task_priority, task_type, user_id, parent_task_id
+            FROM tasks
+            WHERE task_id = %s;
+        """, (task_id,))
+        task = cursor.fetchone()  # Fetch the task
+        return task
+    except Exception as e:
+        print(f"Error fetching task by ID: {e}")  # Log the error
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
 
 # get specific user tasks
@@ -270,6 +284,7 @@ def get_unfinished_user_tasks(user_id):
         conn.close()
 # returns int count for unfinished 
 def count_unfinished_tasks(user_id):
+    print(f"user_id: {user_id}, type: {type(user_id)}")
     conn = connect_to_db()
     if conn is False:
         return 0  # Default to 0 if the connection fails
@@ -279,7 +294,8 @@ def count_unfinished_tasks(user_id):
         SELECT COUNT(*) 
         FROM tasks 
         WHERE user_id = %s AND task_status != 'completed'
-    """, (user_id,))
+    """, (int(user_id),))
+
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -308,25 +324,27 @@ def check_u5(user_id):
         cursor.close()
         conn.close()
 
-def set_task_status(status,task_id):
+def set_task_status(new_status, task_id):
     conn = connect_to_db()
     if conn is False:
         return False
-    cursor = conn.cursor(dictionary=True)
+
+    cursor = conn.cursor()
     try:
         cursor.execute("""
-        update tasks 
-        set task_status = %s  
-        where task_id = %s ;
-        """,(status,task_id))
+            UPDATE tasks
+            SET task_status = %s
+            WHERE task_id = %s;
+        """, (new_status, task_id))
         conn.commit()
         return True
-    except mysql.connector.Error as err:
-        print(f"error : {err}")
+    except Exception as e:
+        print(f"Error updating task status: {e}")  # Debug
         return False
     finally:
         cursor.close()
         conn.close()
+
 
 def set_task_description(string,task_id):
     conn = connect_to_db()
@@ -373,13 +391,13 @@ def get_average_monthly_completed(user_id):
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT AVG(completed_count) AS avg_monthly_completed
+            SELECT AVG(monthly_counts.completed_count) AS avg_monthly_completed
             FROM (
                 SELECT COUNT(*) AS completed_count
                 FROM tasks
                 WHERE user_id = %s AND task_status = 'done'
-                GROUP BY YEAR(task_completion_date), MONTH(task_completion_date)
-            ) AS monthly_counts
+                GROUP BY YEAR(task_dueDate), MONTH(task_dueDate)
+            ) AS monthly_counts;
         """, (user_id,))
         result = cursor.fetchone()
         return result['avg_monthly_completed'] or 0
@@ -389,6 +407,7 @@ def get_average_monthly_completed(user_id):
     finally:
         cursor.close()
         conn.close()
+
 
 def mark_task_as_completed(task_id, user_id):
     conn = connect_to_db()
@@ -446,16 +465,19 @@ def get_total_completed_tasks(user_id):
     conn = connect_to_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT completed_tasks_count FROM users WHERE user_id = %s", (user_id,))
+        cursor.execute("""
+            SELECT COUNT(*) AS total_completed 
+            FROM tasks 
+            WHERE user_id = %s AND task_status = 'done';
+        """, (user_id,))
         result = cursor.fetchone()
-        return result['completed_tasks_count']
+        return result['total_completed']
     except Exception as e:
         print(f"Error fetching total completed tasks: {e}")
         return 0
     finally:
         cursor.close()
         conn.close()
-
 
 
 

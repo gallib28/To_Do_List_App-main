@@ -3,22 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Tasks</title>
+    <title>Dynamic Tasks</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
 </head>
 <body>
     <div class="container">
-        <h2>My Tasks</h2>
-        <form id="add-task-form">
-            <input type="text" id="task_name" placeholder="Task Name" required>
-            <input type="text" id="task_description" placeholder="Task Description" required>
-            <input type="date" id="task_due_date" required>
-            <input type="text" id="task_priority" placeholder="Task Priority">
-            <button type="submit">Add Task</button>
-        </form>
-        <ul id="tasks-list"></ul>
-        <a href="{{ url_for('profile') }}">Go to Profile</a>
+        <h2 style="text-align: center;">My Tasks</h2>
+
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <!-- To-Do Column -->
+            <div class="kanban-column" id="todo-column">
+                <h3>To-Do</h3>
+                <div class="kanban-tasks" id="todo-tasks">
+                    {% for task in tasks if task.task_status == 'to-do' %}
+                    <div class="kanban-task" draggable="true" data-task-id="{{ task.task_id }}">
+                        <h4>{{ task.task_name }}</h4>
+                        <p>{{ task.task_description }}</p>
+                        <p>Due: {{ task.task_dueDate }}</p>
+                        <p>Priority: {{ task.task_priority }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div class="kanban-column" id="in-progress-column">
+                <h3>In Progress</h3>
+                <div class="kanban-tasks" id="in-progress-tasks">
+                    {% for task in tasks if task.task_status == 'in progress' %}
+                    <div class="kanban-task" draggable="true" data-task-id="{{ task.task_id }}">
+                        <h4>{{ task.task_name }}</h4>
+                        <p>{{ task.task_description }}</p>
+                        <p>Due: {{ task.task_dueDate }}</p>
+                        <p>Priority: {{ task.task_priority }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Done Column -->
+            <div class="kanban-column" id="done-column">
+                <h3>Done</h3>
+                <div class="kanban-tasks" id="done-tasks">
+                    {% for task in tasks if task.task_status == 'done' %}
+                    <div class="kanban-task" draggable="true" data-task-id="{{ task.task_id }}">
+                        <h4>{{ task.task_name }}</h4>
+                        <p>{{ task.task_description }}</p>
+                        <p>Due: {{ task.task_dueDate }}</p>
+                        <p>Priority: {{ task.task_priority }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Add Task Button -->
+    <button id="add-task-btn" class="button">Add Task</button>
+
+    <script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
 </body>
 </html>
