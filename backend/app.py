@@ -11,6 +11,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import db_functions
 import os 
 import bcrypt
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(
     __name__,
@@ -80,26 +82,40 @@ def register():
 @app.route('/profile')
 def profile():
     user_id = session.get('user_id')
-    if not isinstance(user_id, int):  # Ensure user_id is an integer
-        print(f"Invalid user_id: {user_id}")
-        return redirect(url_for('login'))
+    if not user_id:
+        return redirect('/login')  # ניתוב להתחברות אם אין משתמש מחובר
 
     username = session.get('username', 'User')
-    unfinished_tasks = db_functions.count_unfinished_tasks(user_id)
-    completed_tasks = db_functions.get_total_completed_tasks(user_id)
-    average_tasks_per_month = db_functions.get_average_monthly_completed(user_id)
 
-    stats = {
-    'average_monthly_completed': average_tasks_per_month,
-    'total_completed': completed_tasks,
-    }
+    # קבלת משימות דחופות בפחות מ-5 ימים
+    urgent_tasks = db_functions.check_u5(user_id)
+    urgent_task_count = len(urgent_tasks) if urgent_tasks else 0  # ספירת משימות דחופות
 
+    # קבלת מספר המטלות הלא גמורות
+    unfinished_task_count = db_functions.count_unfinished_tasks(user_id)
+
+    # העברת הנתונים לעמוד ה-HTML
     return render_template(
         'profile.html',
         username=username,
-        unfinished_tasks=unfinished_tasks,
-        stats=stats
+        urgent_task_count=urgent_task_count,
+        unfinished_task_count=unfinished_task_count
     )
+
+@app.route('/delete_completed_tasks', methods=['POST'])
+def delete_completed_tasks():
+    # בדיקת אם המשתמש מחובר
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    success = db_functions.delete_completed_tasks()
+    if success:
+        flash("All completed tasks have been deleted successfully!", "success")
+    else:
+        flash("Failed to delete completed tasks. Please try again.", "error")
+
+    return redirect(url_for('profile'))
+
 
 @app.route('/task/<int:task_id>', methods=['GET'])
 def task_details(task_id):
@@ -147,44 +163,90 @@ def settings():
 
     return render_template('settings.html', user=user)
 
-# דף המשימות של המשתמש
 @app.route('/user_tasks')
 def user_tasks():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    tasks = db_functions.get_user_tasks(session['user_id'])
+    tasks = db_functions.get_user_tasks(session['user_id'])  # Updated function
+    if tasks is False:
+        flash("Error fetching tasks", "danger")
+        return redirect('/profile')
+    
     return render_template('user_tasks.html', tasks=tasks)
 
-# פונקציה להוספת משימה חדשה
 @app.route('/add_task', methods=['POST'])
 def add_task():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    try:
+        data = request.get_json()
+        print("Received data:", data)  # Debugging log
+        
+        # Validate required fields
+        required_fields = ['task_name', 'task_description', 'task_type', 'task_status']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"success": False, "error": f"Missing or invalid field: {field}"}), 400
 
-    data = request.json
-    task_name = data.get('task_name')
-    task_description = data.get('task_description')
-    task_due_date = data.get('task_due_date')
-    task_priority = data.get('task_priority')
+        # Insert task into the database
+        success = db_functions.create_task(
+            name=data['task_name'],
+            description=data['task_description'],
+            due_date=data.get('task_due_date'),  # Optional field
+            task_type=data.get('task_type', 'p'),  # Default to 'p'
+            task_status=data.get('task_status', 'to-do'),  # Default to 'to-do'
+            user_id=session['user_id'],  # Get from session
+            parent_task_id=data.get('parent_task_id'),  # Optional field
+            task_priority=data.get('task_priority')  # Optional field
+        )
 
-    # Save task to database
-    db_functions.create_task(
-        name=task_name,
-        description=task_description,
-        due_date=task_due_date,
-        task_type="todo",
-        task_status="to-do",
-        user_id=session['user_id'],
-        parent_task_id=None,
-        task_priority=task_priority
-    )
+        if success:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Failed to add task"}), 500
 
-    # Get GPT subtask suggestions
-    subtasks = db_functions.get_subtasks(task_name, task_description)
-    return jsonify({"success": True, "suggestions": subtasks})
+    except Exception as e:
+        print("Error in /add_task:", e)  # Debugging log
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/add_subtasks', methods=['POST'])
+def add_subtasks():
+    try:
+        data = request.get_json()
+        subtasks = data.get('subtasks', [])
+
+        for subtask in subtasks:
+            db_functions.create_task(
+                name=subtask['task_name'],
+                description=subtask['task_description'],
+                due_date=subtask.get('task_due_date'),
+                task_type=subtask['task_type'],
+                task_status=subtask['task_status'],
+                user_id=session['user_id'],
+                parent_task_id=subtask['parent_task_id'],
+                task_priority=subtask.get('task_priority')
+            )
+
+        return jsonify({"success": True})
+    except Exception as e:
+        print("Error in /add_subtasks:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
+
+@app.route('/get_gpt_assistance', methods=['POST'])
+def get_gpt_assistance():
+    try:
+        data = request.get_json()
+        task_name = data.get('task_name')
+        task_description = data.get('task_description')
+
+        # Call your GPT function here
+        suggestions = db_functions.get_subtasks(task_name, task_description)
+
+        return jsonify({"success": True, "suggestions": suggestions})
+    except Exception as e:
+        print("Error in /get_gpt_assistance:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
@@ -220,18 +282,13 @@ def update_task_status(task_id):
     if new_status not in VALID_STATUSES:
         return jsonify({"error": "Invalid status"}), 400
 
-    if new_status not in VALID_STATUSES:
-        return jsonify({"error": "Invalid status"}), 400
+    # Call the function to update the task status
+    result = db_functions.set_task_status(new_status, task_id)
 
-
-    success = db_functions.set_task_status(new_status, task_id)
-    if success:
-        print(f"Task {task_id} updated to status {new_status} successfully.")
+    if result:
         return jsonify({'success': True})
     else:
-        print(f"Failed to update task {task_id} to status {new_status}.")
         return jsonify({'error': 'Failed to update task status'}), 500
-
 
 @app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):
@@ -291,6 +348,21 @@ def update_password():
         flash(f"Error updating password: {e}", "error")
 
     return redirect('/settings')
+
+
+@app.route('/admin', methods=['GET'])
+def admin_dashboard():
+    user_id = session.get('user_id')
+    # בדוק אם המשתמש הוא מנהל
+    if not user_id or not session.get('is_admin'):
+        return redirect('/login')
+
+    # שלוף את כל המשתמשים והמשימות
+    users = db_functions.get_all_users()
+    tasks = db_functions.get_all_tasks()
+    return render_template('admin_dashboard.html', users=users, tasks=tasks)
+
+
 
 
 @app.route('/update_task/<int:task_id>', methods=['POST'])

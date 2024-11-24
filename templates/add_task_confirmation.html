@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Confirmation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Task "{{ task_name }}" Subtasks</h1>
+    <p>Description: {{ task_description }}</p>
+
+    <h3>Generated Subtasks:</h3>
+    <ul>
+        {% for subtask in subtasks %}
+            <li>{{ subtask }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('user_tasks') }}" class="btn btn-primary">Back to Task List</a>
+</body>
+</html>

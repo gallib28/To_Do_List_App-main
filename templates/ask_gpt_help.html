@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Help from GPT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Task "{{ task_name }}" Added Successfully!</h1>
+    <p>Description: {{ task_description }}</p>
+
+    <h3>Would you like help from GPT to create subtasks for this task?</h3>
+    
+    <form action="{{ url_for('process_gpt_help') }}" method="POST">
+        <input type="hidden" name="task_name" value="{{ task_name }}">
+        <input type="hidden" name="task_description" value="{{ task_description }}">
+        <button type="submit" name="gpt_help" value="yes" class="btn btn-primary">Yes</button>
+        <button type="submit" name="gpt_help" value="no" class="btn btn-secondary">No</button>
+    </form>
+</body>
+</html>

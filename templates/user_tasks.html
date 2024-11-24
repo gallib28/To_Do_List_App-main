@@ -8,7 +8,7 @@
     <link rel="icon" href="static/images/todoLOGO.png" 
         type="image/x-icon" >
 </head>
-<body class="theme-{{ theme_color }}">
+<body>
         <div class="container">
         <h2 style="text-align: center;">My Tasks</h2>
 
@@ -60,14 +60,92 @@
             </div>
         </div>
     </div>
-
-    <!-- Add Task Button -->
-    <button id="add-task-btn" class="button">Add Task</button>
     <div class="button-container">
-        <!-- Add this button for going back to the profile -->
+    <button id="add-task-btn" class="btn btn-primary" onclick="openTaskForm()">Add Task</button>
+    </div>
+    <div class="button-container">
         <a href="/profile" class="button back-button">Back to Profile</a>
     </div>
-    
     <script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+   <!-- Add Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+        <span class="close" onclick="closeTaskForm()">&times;</span>
+        <h2>Add New Task</h2>
+        <form id="task-form">
+            <label for="task-name">Task Name:</label>
+            <input type="text" id="task-name" name="task_name" required />
+    
+            <label for="task-description">Task Description:</label>
+            <textarea id="task-description" name="task_description" required></textarea>
+    
+            <label for="task-due-date">Due Date:</label>
+            <input type="date" id="task-due-date" name="task_due_date" />
+    
+            <label for="task-type">Task Type:</label>
+            <select id="task-type" name="task_type">
+            <option value="p">Personal</option>
+            <option value="t">Team</option>
+            <option value="w">Work</option>
+            <option value="s">School</option>
+            </select>
+    
+            <label for="task-status">Task Status:</label>
+            <select id="task-status" name="task_status">
+            <option value="to-do">To-Do</option>
+            <option value="in progress">In Progress</option>
+            <option value="done">Done</option>
+            </select>
+    
+            <label for="task-priority">Priority:</label>
+            <input type="number" id="task-priority" name="task_priority" min="1" max="5" />
+    
+            <label for="parent-task-id">Parent Task ID:</label>
+            <input type="number" id="parent-task-id" name="parent_task_id" />
+    
+            <button type="button" onclick="submitTaskForm()">Add Task</button>
+        </form>
+        </div>
+    </div>
+  
+    
+      
+      <style>
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgb(0, 0, 0);
+          background-color: rgba(0, 0, 0, 0.4);
+        }
+      
+        .modal-content {
+          background-color: #fefefe;
+          margin: 15% auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 50%;
+        }
+      
+        .close {
+          color: #aaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+        }
+      
+        .close:hover,
+        .close:focus {
+          color: black;
+          text-decoration: none;
+          cursor: pointer;
+        }
+      </style>
+      
 </body>
 </html>

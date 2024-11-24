@@ -8,7 +8,7 @@
     <link rel="icon" href="static/images/todoLOGO.png" 
     type="image/x-icon" >
 </head>
-<body class="theme-{{ theme_color }}">
+<body>
     <header>
         <nav>
             <h1>{{ username }}'s Profile</h1>      
@@ -20,19 +20,17 @@
         <div class="profile-container">
             <section class="stats">
                 <h2>Your Statistics</h2>
-                <div class="stat-card">
-                        <h3>Unfinished Tasks</h3>
-                        <p>{{ unfinished_tasks }}</p>
-                    </div>
-                    
-                <div class="stat-card">
-                    <h3>Average Tasks Per Month Completed</h3>
-                    <p>{{ stats['average_monthly_completed'] }}</p>
+                <div class="stat-box">
+                    <h3>Unfinished Tasks</h3>
+                    <p>{{ unfinished_task_count }}</p>
                 </div>
-                <div class="stat-card">
-                    <h3>Total Completed Tasks</h3>
-                    <p>{{ stats['total_completed'] }}</p>
+                
+                <div class="stat-box">
+                    <h3>Urgent Tasks (Due in 5 Days)</h3>
+                    <p>{{ urgent_task_count }}</p>
                 </div>
+                       
+                
             </section>
 
             <section class="actions">
@@ -43,7 +41,11 @@
                 <div class="action-card">
                     <h3>Settings</h3>
                     <a href="{{ url_for('settings') }}" class="button">Go to Settings</a>
+                    
                 </div>
+                <form action="{{ url_for('delete_completed_tasks') }}" method="POST" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-danger">Delete All Completed Tasks</button>
+                </form>
             </section>
         </div>
     </main>

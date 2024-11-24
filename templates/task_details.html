@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>Task Details</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks_details.css') }}">
 </head>
-<body class="theme-{{ theme_color }}">
+<body>
         <div class="container">
         <h1>Task Details</h1>
         <div class="task-details">
@@ -36,6 +36,57 @@
             <a href="{{ url_for('edit_task', task_id=task.task_id) }}" class="button">Edit Task</a>
             <a href="{{ url_for('user_tasks') }}" class="button">Back to Tasks</a>
         </div>
+    </div>
+</body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks_details.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Task Details</h1>
+        <div class="task-details">
+            <p><strong>Task Name:</strong> {{ task.task_name }}</p>
+            <p><strong>Description:</strong> {{ task.task_description }}</p>
+            <p><strong>Due Date:</strong> {{ task.task_dueDate }}</p>
+            <p><strong>Priority:</strong> {{ task.task_priority }}</p>
+            <p><strong>Status:</strong> {{ task.task_status }}</p>
+        
+        <!-- Subtasks -->
+        <section class="subtasks">
+            <h2>Subtasks</h2>
+            {% if sub_tasks %}
+                <ul>
+                    {% for sub_task in sub_tasks %}
+                        <li>
+                            <a href="{{ url_for('task_details', task_id=sub_task['task_id']) }}">
+                                {{ sub_task['task_name'] }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No subtasks available for this task.</p>
+            {% endif %}
+        </section>
+        <div class="actions">
+            <a href="{{ url_for('edit_task', task_id=task.task_id) }}" class="button">Edit Task</a>
+            <a href="{{ url_for('user_tasks') }}" class="button">Back to Tasks</a>
+        </div>
+
+        <!-- Navigation -->
+        <footer>
+            <a href="{{ url_for('user_tasks') }}" class="btn">Back to Tasks</a>
+        </footer>
     </div>
 </body>
 </html>
