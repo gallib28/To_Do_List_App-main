@@ -51,7 +51,8 @@ def register():
         password = request.form.get('password')
 
         if not username or not password:
-            return render_template('register.html', error="Both fields are required")
+            html = "register.html"
+            return render_template(html, error="Both fields are required")
 
         print(f"Attempting to register user: {username}")
 
@@ -64,7 +65,8 @@ def register():
 
         if existing_user:
             print("Username already exists.")
-            return render_template('register.html', error="Username already exists")
+            html = "register.html"
+            return render_template(html, error="Username already exists")
 
         # Create a new user
         created = db_functions.create_user(username, password)
@@ -317,6 +319,9 @@ def edit_task(task_id):
             return "Failed to update task", 500
 
 
+# user name update function 
+# updates the db 
+# redirecting the website to settings page 
 @app.route('/update_username', methods=['POST'])
 def update_username():
     username = request.form['username']
