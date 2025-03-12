@@ -13,8 +13,8 @@ import os
 import bcrypt
 from dotenv import load_dotenv
 load_dotenv()
-
-app = Flask(
+  
+app = Flask(   
     __name__,
     template_folder='../templates',  # מיקום תיקיית התבניות
     static_folder='../static'       # מיקום תיקיית הקבצים הסטטיים
