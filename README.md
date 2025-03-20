@@ -59,7 +59,33 @@ Python with Flask
 - Cloud-based deployment (AWS / Google Cloud / Firebase)
 - Docker containerization
 - (for now the server of the app and db is on rpi) need to adjust.
-- 
+### **3.5 all tht functions in backend:**
+1. connect_to_db()
+2. create_user(username, password)
+3. create_task(name, description, due_date, task_type, task_status, user_id, parent_task_id, task_priority)
+4. login_user(username, password)
+5. update_existing_password(username,old_password,new_password)
+6. get_tasks()
+7. get_user_tasks(user_id)
+8. get_sub_tasks_by_parent_id(parent_task_id)
+9. delete_task(task_id)
+10. delete_user_db(user_id)
+11. get_unfinished_user_tasks(user_id)
+12. count_unfinished_tasks_of_user(user_id)
+13. check_tasks_u5(user_id)
+14. set_task_status(new_status, task_id)
+15. set_task_description(string,task_id)
+16. set_task_name(name,task_id)
+17. get_average_monthly_completed(user_id)
+18. update_username_in_db(user_id, username)
+19. get_total_completed_tasks(user_id)
+20. get_user_by_id(user_id)
+21. update_user_theme(user_id, theme_color)
+22. set_user_block_status(user_id, is_blocked)
+23. get_all_tasks()
+24. get_task_by_id(task_id)
+25. update_task_in_db(task_id, task_name, description, due_date, priority, status)
+26. delete_completed_tasks() 
 ## **4. User Roles & Permissions**
 - **Admin:** Manage users, set global settings, and view reports.
 - **User:** Create, manage, and complete tasks.
